@@ -18,10 +18,12 @@ jobs:
         matrix:
           os: [windows-latest]
           configuration: [Release, Debug]
+          platform: [x64, x86, amd64]
           dotnet-version: ['6.0.x']
     runs-on: ${{ matrix.os }}
     env:
-      NUGET_CERT_REVOCATION_MODE: offline
+      MSIX_VERSION: "0.1"
+      SDK_VERSION: "0.1"
     steps:
     - uses: actions/checkout@v3
       with:
@@ -34,68 +36,39 @@ jobs:
       env:
         NUGET_AUTH_TOKEN: ${{ secrets.GPR_READ_TOKEN }}
 
-    - uses: actions/cache@v3
-      with:
-        path: ~/.nuget/packages
-        # Look to see if there is a cache hit for the corresponding requirements file
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget
-
-    - name: Find solutions
-      shell: bash
-      run: |
-        echo "DevHomeSdkSolution=$(find ./dotnet -type f -name "DevHomeSDK.sln" | tr '\n' ' ')" >> $GITHUB_ENV
-        echo "DevHomeSolution=$(find ./dotnet -type f -name "DevHome.sln" | tr '\n' ' ')" >> $GITHUB_ENV
-
-    # - name: Restore dependencies
-    #   shell: bash
-    #   run: |
-    #     dotnet restore $DevHomeSdkSolution
-    #     dotnet restore $DevHomeSolution
-
-    # - name: Build_SDK
-    #   shell: bash
-    #   run: dotnet build $DevHomeSdkSolution --no-restore --configuration ${{ matrix.configuration }}
-
-    # - name: Build_DevHome
-    #   shell: bash
-    #   run: dotnet build $DevHomeSolution --no-restore --configuration ${{ matrix.configuration }}
+    # - uses: actions/cache@v3
+    #   with:
+    #     path: ~/.nuget/packages
+    #     # Look to see if there is a cache hit for the corresponding requirements file
+    #     key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-nuget
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
 
-    - name: Restore NuGet packages
+    - name: Restore DevHomeSDK NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        nuget restore $DevHomeSdkSolution
-        nuget restore $DevHomeSolution
+      run: nuget restore pluginsdk\DevHomeSDK.sln
+
+    - name: Build_DevHomeSDK
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: Build.ps1 -Configuration "Release" -SDKVersion ${{env.SDK_VERSION}} -BuildStep "sdk"
+
+    - name: Restore DevHome NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore DevHome.sln
 
     - name: Build_DevHome
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild /m /p:Configuration=Release /p:Platform=x64 DevHome.sln
+      run: Build.ps1 -Platform ${{ matrix.platform }} -Configuration ${{ matrix.configuration }} -Version ${{env.MSIX_VERSION}} -SDKVersion ${{env.SDK_VERSION}} -BuildStep "msix" -AzureBuildingBranch "main"
 
-    - name: Find unit test projects
-      shell: bash
-      run: |
-        echo "unittests=$(find ./dotnet -type f -name "*.UnitTests.csproj" | tr '\n' ' ')" >> $GITHUB_ENV
-        echo "devhometests=$(find ./dotnet -type f -name "DevHome.Test.csproj" | tr '\n' ' ')" >> $GITHUB_ENV
+    - name: Run Unittests
+      run: Test.ps1 -Platform ${{ matrix.platform }} -Configuration ${{ matrix.configuration }}
 
-    - name: Test
-      shell: bash
-      run: |
-        for project in ${{ env.devhometests }}; do
-            dotnet test $project --no-build --verbosity normal --logger trx --results-directory ./TestResults --configuration ${{ matrix.configuration }}
-        done
-        for project in ${{ env.unittests }}; do
-            dotnet test $project --no-build --verbosity normal --logger trx --results-directory ./TestResults --configuration ${{ matrix.configuration }}
-        done
-
-    - name: Upload dotnet test results
-      uses: actions/upload-artifact@v3
-      with:
-        name: dotnet-testresults-${{ matrix.configuration }}
-        path: ./TestResults
-      if: ${{ always() }}
+    # - name: Upload dotnet test results
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: dotnet-testresults-${{ matrix.configuration }}
+    #     path: ./TestResults
+    #   if: ${{ always() }}
