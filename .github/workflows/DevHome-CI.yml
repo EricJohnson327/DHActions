@@ -36,25 +36,17 @@ jobs:
       env:
         NUGET_AUTH_TOKEN: ${{ secrets.GPR_READ_TOKEN }}
 
-    # - uses: actions/cache@v3
-    #   with:
-    #     path: ~/.nuget/packages
-    #     # Look to see if there is a cache hit for the corresponding requirements file
-    #     key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-    #     restore-keys: |
-    #       ${{ runner.os }}-nuget
-
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
 
-    - name: Restore DevHomeSDK NuGet packages
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore pluginsdk\DevHomeSDK.sln
+    # - name: Restore DevHomeSDK NuGet packages
+    #   working-directory: ${{env.GITHUB_WORKSPACE}}
+    #   run: nuget restore pluginsdk\DevHomeSDK.sln
 
-    - name: Build_DevHomeSDK
-      shell: pwsh
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: .\Build.ps1 -Configuration "Release" -SDKVersion ${{env.SDK_VERSION}} -BuildStep "sdk"
+    # - name: Build_DevHomeSDK
+    #   shell: pwsh
+    #   working-directory: ${{env.GITHUB_WORKSPACE}}
+    #   run: .\Build.ps1 -Configuration "Release" -SDKVersion ${{env.SDK_VERSION}} -BuildStep "sdk"
 
     - name: Restore DevHome NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -63,7 +55,7 @@ jobs:
     - name: Build_DevHome
       shell: pwsh
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: .\Build.ps1 -Platform ${{ matrix.platform }} -Configuration ${{ matrix.configuration }} -Version ${{env.MSIX_VERSION}} -SDKVersion ${{env.SDK_VERSION}} -BuildStep "msix" -AzureBuildingBranch "main"
+      run: .\Build.ps1 -Platform ${{ matrix.platform }} -Configuration ${{ matrix.configuration }}
 
     - name: Run Unittests
       shell: pwsh
