@@ -52,19 +52,22 @@ jobs:
       run: nuget restore pluginsdk\DevHomeSDK.sln
 
     - name: Build_DevHomeSDK
+      shell: pwsh
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: Build.ps1 -Configuration "Release" -SDKVersion ${{env.SDK_VERSION}} -BuildStep "sdk"
+      run: .\Build.ps1 -Configuration "Release" -SDKVersion ${{env.SDK_VERSION}} -BuildStep "sdk"
 
     - name: Restore DevHome NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: nuget restore DevHome.sln
 
     - name: Build_DevHome
+      shell: pwsh
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: Build.ps1 -Platform ${{ matrix.platform }} -Configuration ${{ matrix.configuration }} -Version ${{env.MSIX_VERSION}} -SDKVersion ${{env.SDK_VERSION}} -BuildStep "msix" -AzureBuildingBranch "main"
+      run: .\Build.ps1 -Platform ${{ matrix.platform }} -Configuration ${{ matrix.configuration }} -Version ${{env.MSIX_VERSION}} -SDKVersion ${{env.SDK_VERSION}} -BuildStep "msix" -AzureBuildingBranch "main"
 
     - name: Run Unittests
-      run: Test.ps1 -Platform ${{ matrix.platform }} -Configuration ${{ matrix.configuration }}
+      shell: pwsh
+      run: .\Test.ps1 -Platform ${{ matrix.platform }} -Configuration ${{ matrix.configuration }}
 
     # - name: Upload dotnet test results
     #   uses: actions/upload-artifact@v3
