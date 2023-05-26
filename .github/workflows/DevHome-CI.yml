@@ -54,9 +54,9 @@ jobs:
         dotnet restore $DevHomeSdkSolution
         dotnet restore $DevHomeSolution
 
-    - name: Build_SDK
-      shell: bash
-      run: dotnet build $DevHomeSdkSolution --no-restore --configuration ${{ matrix.configuration }}
+    # - name: Build_SDK
+    #   shell: bash
+    #   run: dotnet build $DevHomeSdkSolution --no-restore --configuration ${{ matrix.configuration }}
 
     - name: Build_DevHome
       shell: bash
