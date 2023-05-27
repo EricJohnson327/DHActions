@@ -41,6 +41,18 @@ jobs:
       with:
         vs-version: '17.5'
 
+    - name: Download nuget
+      run: |
+        mkdir ".\.nuget"
+        Invoke-WebRequest "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" -OutFile ".\.nuget\nuget.exe"
+
+    - name: Find VsDevCmd.bat
+      run: |
+        $VSDevCmd = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere" -latest -find Common7\tools\VSDevCmd.bat
+        if (!$VSDevCmd) { exit 1 }
+        echo "Using VSDevCmd: ${VSDevCmd}"
+        Add-Content $env:GITHUB_ENV "VSDevCmd=$VSDevCmd"
+
     # - name: Restore DevHomeSDK NuGet packages
     #   working-directory: ${{env.GITHUB_WORKSPACE}}
     #   run: nuget restore pluginsdk\DevHomeSDK.sln
@@ -50,17 +62,13 @@ jobs:
     #   working-directory: ${{env.GITHUB_WORKSPACE}}
     #   run: .\Build.ps1 -Configuration "Release" -SDKVersion ${{env.SDK_VERSION}} -BuildStep "sdk"
 
-    - name: Setup Nuget
-      uses: Nuget/setup-nuget@v1.0.5
-
-    - name: Restore DevHome NuGet packages
+    - name: Restore nuget packages
       run: |
-        nuget restore pluginsdk\DevHomeSDK.sln
-        nuget restore DevHome.sln
+        cmd /c "$env:VSDevCmd" "&" nuget restore pluginsdk\DevHomeSDK.sln
+        cmd /c "$env:VSDevCmd" "&" nuget restore DevHome.sln
 
     - name: Build_DevHome
-      shell: pwsh
-      run: .\Build.ps1 -Platform ${{ matrix.platform }} -Configuration ${{ matrix.configuration }}
+      run: cmd /c "$env:VSDevCmd" "&" msbuild /m /p:Configuration=${{ matrix.configuration }},Platform=${{ matrix.platform }} DevHome.sln
 
     - name: Run Unittests
       shell: pwsh
