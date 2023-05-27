@@ -65,7 +65,6 @@ jobs:
     - name: Restore dependencies
       shell: bash
       run: |
-        dotnet restore pluginsdk\DevHomeSDK.sln /p:PublishReadyToRun=true
         dotnet restore DevHome.sln /p:PublishReadyToRun=true
 
     # - name: Restore nuget packages
