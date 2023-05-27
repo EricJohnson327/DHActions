@@ -37,7 +37,9 @@ jobs:
         NUGET_AUTH_TOKEN: ${{ secrets.GPR_READ_TOKEN }}
 
     - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
+      uses: microsoft/setup-msbuild@v1.1
+      with:
+        vs-version: '17.6'
 
     # - name: Restore DevHomeSDK NuGet packages
     #   working-directory: ${{env.GITHUB_WORKSPACE}}
