@@ -39,7 +39,7 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.1
       with:
-        vs-version: '17.6'
+        vs-version: '17.5'
 
     # - name: Restore DevHomeSDK NuGet packages
     #   working-directory: ${{env.GITHUB_WORKSPACE}}
