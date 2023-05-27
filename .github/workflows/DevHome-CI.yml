@@ -62,10 +62,16 @@ jobs:
     #   working-directory: ${{env.GITHUB_WORKSPACE}}
     #   run: .\Build.ps1 -Configuration "Release" -SDKVersion ${{env.SDK_VERSION}} -BuildStep "sdk"
 
-    - name: Restore nuget packages
+    - name: Restore dependencies
+      shell: bash
       run: |
-        cmd /c "$env:VSDevCmd" "&" nuget restore pluginsdk\DevHomeSDK.sln
-        cmd /c "$env:VSDevCmd" "&" nuget restore DevHome.sln
+        dotnet restore pluginsdk\DevHomeSDK.sln /p:PublishReadyToRun=true
+        dotnet restore DevHome.sln /p:PublishReadyToRun=true
+
+    # - name: Restore nuget packages
+    #   run: |
+    #     cmd /c "$env:VSDevCmd" "&" nuget restore pluginsdk\DevHomeSDK.sln
+    #     cmd /c "$env:VSDevCmd" "&" nuget restore DevHome.sln
 
     - name: Build_DevHome
       run: cmd /c "$env:VSDevCmd" "&" msbuild /m /p:Configuration=${{ matrix.configuration }},Platform=${{ matrix.platform }} DevHome.sln
