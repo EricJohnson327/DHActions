@@ -59,7 +59,7 @@ jobs:
         dotnet restore DevHome.sln -p:PublishReadyToRun=true
 
     - name: Build_SDK
-      run: cmd /c "$env:VSDevCmd" "&" msbuild /m /p:Configuration=Release,Platform=${{ matrix.platform }} pluginsdk\\DevHome.sln
+      run: cmd /c "$env:VSDevCmd" "&" msbuild /m /p:Configuration=Release,Platform=${{ matrix.platform }} pluginsdk\\DevHomeSDK.sln
 
     - name: Build_DevHome
       run: cmd /c "$env:VSDevCmd" "&" msbuild /m /p:Configuration=${{ matrix.configuration }},Platform=${{ matrix.platform }} DevHome.sln
