@@ -53,31 +53,30 @@ jobs:
         echo "Using VSDevCmd: ${VSDevCmd}"
         Add-Content $env:GITHUB_ENV "VSDevCmd=$VSDevCmd"
 
-    # - name: Restore DevHomeSDK NuGet packages
-    #   working-directory: ${{env.GITHUB_WORKSPACE}}
-    #   run: nuget restore pluginsdk\DevHomeSDK.sln
-
-    # - name: Build_DevHomeSDK
-    #   shell: pwsh
-    #   working-directory: ${{env.GITHUB_WORKSPACE}}
-    #   run: .\Build.ps1 -Configuration "Release" -SDKVersion ${{env.SDK_VERSION}} -BuildStep "sdk"
-
     - name: Restore dependencies
       shell: bash
       run: |
         dotnet restore DevHome.sln -p:PublishReadyToRun=true
 
-    # - name: Restore nuget packages
-    #   run: |
-    #     cmd /c "$env:VSDevCmd" "&" nuget restore pluginsdk\DevHomeSDK.sln
-    #     cmd /c "$env:VSDevCmd" "&" nuget restore DevHome.sln
+    - name: Build_SDK
+      run: cmd /c "$env:VSDevCmd" "&" msbuild /m /p:Configuration=Release,Platform=${{ matrix.platform }} pluginsdk\\DevHome.sln
 
     - name: Build_DevHome
       run: cmd /c "$env:VSDevCmd" "&" msbuild /m /p:Configuration=${{ matrix.configuration }},Platform=${{ matrix.platform }} DevHome.sln
 
-    - name: Run Unittests
-      shell: pwsh
-      run: .\Test.ps1 -Platform ${{ matrix.platform }} -Configuration ${{ matrix.configuration }}
+    - name: Find vstest.console.exe
+      run: |
+        $VSDevTestCmd = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere" -latest -prerelease -products * -find **\TestPlatform\vstest.console.exe
+        if (!$VSDevTestCmd) { exit 1 }
+        echo "Using VSDevTestCmd: ${VSDevTestCmd}"
+        Add-Content $env:GITHUB_ENV "VSDevTestCmd=$VSDevTestCmd"
+
+    - name: DevHome Unittests
+      run: cmd /c "$env:VSDevTestCmd" /Platform:${{ matrix.platform }} /Logger:trx;LogFileName=DevHome.Test-${{ matrix.platform }}-${{ matrix.configuration }}.trx test\bin\${{ matrix.platform }}\${{ matrix.configuration }}\net6.0-windows10.0.22000.0\DevHome.Test.dll
+
+    # - name: Run Unittests
+    #   shell: pwsh
+    #   run: .\Test.ps1 -Platform ${{ matrix.platform }} -Configuration ${{ matrix.configuration }}
 
     # - name: Upload dotnet test results
     #   uses: actions/upload-artifact@v3
