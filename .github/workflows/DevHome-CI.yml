@@ -48,13 +48,16 @@ jobs:
     #   working-directory: ${{env.GITHUB_WORKSPACE}}
     #   run: .\Build.ps1 -Configuration "Release" -SDKVersion ${{env.SDK_VERSION}} -BuildStep "sdk"
 
+    - name: Setup Nuget
+      uses: Nuget/setup-nuget@v1.0.5
+
     - name: Restore DevHome NuGet packages
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore DevHome.sln
+      run: |
+        nuget restore pluginsdk\DevHomeSDK.sln
+        nuget restore DevHome.sln
 
     - name: Build_DevHome
       shell: pwsh
-      working-directory: ${{env.GITHUB_WORKSPACE}}
       run: .\Build.ps1 -Platform ${{ matrix.platform }} -Configuration ${{ matrix.configuration }}
 
     - name: Run Unittests
