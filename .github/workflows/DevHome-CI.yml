@@ -88,12 +88,6 @@ jobs:
     - name: Tools Unittests
       if: ${{ matrix.platform != 'arm64' }}
       run: |
-        foreach ($toolPath in (Get-ChildItem "tools")) {
-          $tool = $toolPath.Name
-          echo "AAA"
-          echo $tool
-          echo "BBB"
-          dir "tools\\$tool\\*UnitTest\\bin\\${{ matrix.platform }}\\${{ matrix.configuration }}\\net6.0-windows10.0.22000.0\\*.UnitTest.dll"
-          echo "CCC"
-          cmd /c "$env:VSDevTestCmd" /Platform:${{ matrix.platform }} "tools\\$tool\\*UnitTest\\bin\\${{ matrix.platform }}\\${{ matrix.configuration }}\\net6.0-windows10.0.22000.0\\*.UnitTest.dll"
+        foreach ($UnitTestPath in (Get-ChildItem "tools\\*\\*UnitTest\\bin\\${{ matrix.platform }}\\${{ matrix.configuration }}\\net6.0-windows10.0.22000.0\\*.UnitTest.dll")) {
+          cmd /c "$env:VSDevTestCmd" /Platform:${{ matrix.platform }} $UnitTestPath.FullName
         }
