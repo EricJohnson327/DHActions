@@ -3,17 +3,13 @@
 #
 
 name: DevHome-CI
-
 on:
-  workflow_dispatch:
   push:
+  pull_request:
     branches: [ "main", "feature*" ]
 
-permissions:
-  contents: read
-
 jobs:
-  dotnet-build-and-test:
+  build-and-test:
     strategy:
       matrix:
         configuration: [Release, Debug]
@@ -87,8 +83,8 @@ jobs:
 
     - name: DevHome Unittests
       if: ${{ matrix.platform != 'arm64' }}
-      run: cmd /c "$env:VSDevTestCmd" /Platform:${{ matrix.platform }} test\bin\${{ matrix.platform }}\${{ matrix.configuration }}\net6.0-windows10.0.22000.0\DevHome.Test.dll
-      # run: cmd /c "$env:VSDevTestCmd" /Platform:${{ matrix.platform }} /Logger:trx;LogFileName=DevHome.Test-${{ matrix.platform }}-${{ matrix.configuration }}.trx test\bin\${{ matrix.platform }}\${{ matrix.configuration }}\net6.0-windows10.0.22000.0\DevHome.Test.dll
+      # run: cmd /c "$env:VSDevTestCmd" /Platform:${{ matrix.platform }} test\bin\${{ matrix.platform }}\${{ matrix.configuration }}\net6.0-windows10.0.22000.0\DevHome.Test.dll
+      run: cmd /c "$env:VSDevTestCmd" /Platform:${{ matrix.platform }} /Logger:trx;LogFileName=DevHome.Test-${{ matrix.platform }}-${{ matrix.configuration }}.trx test\bin\${{ matrix.platform }}\${{ matrix.configuration }}\net6.0-windows10.0.22000.0\DevHome.Test.dll
 
     # - name: Run Unittests
     #   shell: pwsh
