@@ -15,11 +15,11 @@ permissions:
 jobs:
   dotnet-build-and-test:
     strategy:
-      os: [windows-latest]
-      dotnet-version: ['6.0.x']
       matrix:
         configuration: [Release, Debug]
         platform: [x64, x86, arm64]
+        os: [windows-latest]
+        dotnet-version: ['6.0.x']
         exclude:
         - configuration: Debug
           platform: x64
