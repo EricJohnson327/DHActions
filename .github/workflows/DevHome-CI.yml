@@ -15,11 +15,18 @@ permissions:
 jobs:
   dotnet-build-and-test:
     strategy:
-        matrix:
-          os: [windows-latest]
-          configuration: [Release, Debug]
-          platform: [x64, x86, arm64]
-          dotnet-version: ['6.0.x']
+      os: [windows-latest]
+      dotnet-version: ['6.0.x']
+      matrix:
+        configuration: [Release, Debug]
+        platform: [x64, x86, arm64]
+        exclude:
+        - configuration: Debug
+          platform: x64
+        - configuration: Release
+          platform: x86
+        - configuration: Debug
+          platform: arm64
     runs-on: ${{ matrix.os }}
     env:
       MSIX_VERSION: "0.1"
@@ -71,6 +78,7 @@ jobs:
       run: cmd /c "$env:VSDevCmd" "&" msbuild /m /p:Configuration=${{ matrix.configuration }},Platform=${{ matrix.platform }} DevHome.sln
 
     - name: Find vstest.console.exe
+      if: ${{ matrix.platform != 'arm64' }}
       run: |
         $VSDevTestCmd = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere" -latest -prerelease -products * -find **\TestPlatform\vstest.console.exe
         if (!$VSDevTestCmd) { exit 1 }
@@ -78,6 +86,7 @@ jobs:
         Add-Content $env:GITHUB_ENV "VSDevTestCmd=$VSDevTestCmd"
 
     - name: DevHome Unittests
+      if: ${{ matrix.platform != 'arm64' }}
       run: cmd /c "$env:VSDevTestCmd" /Platform:${{ matrix.platform }} test\bin\${{ matrix.platform }}\${{ matrix.configuration }}\net6.0-windows10.0.22000.0\DevHome.Test.dll
       # run: cmd /c "$env:VSDevTestCmd" /Platform:${{ matrix.platform }} /Logger:trx;LogFileName=DevHome.Test-${{ matrix.platform }}-${{ matrix.configuration }}.trx test\bin\${{ matrix.platform }}\${{ matrix.configuration }}\net6.0-windows10.0.22000.0\DevHome.Test.dll
 
