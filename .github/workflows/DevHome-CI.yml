@@ -90,9 +90,9 @@ jobs:
     #   shell: pwsh
     #   run: .\Test.ps1 -Platform ${{ matrix.platform }} -Configuration ${{ matrix.configuration }}
 
-    # - name: Upload dotnet test results
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: dotnet-testresults-${{ matrix.configuration }}
-    #     path: ./TestResults
-    #   if: ${{ always() }}
+    - name: Upload dotnet test results
+      uses: actions/upload-artifact@v3
+      with:
+        name: dotnet-testresults-${{ matrix.configuration }}
+        path: *.trx
+      if: ${{ always() }}
