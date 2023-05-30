@@ -83,16 +83,12 @@ jobs:
 
     - name: DevHome Unittests
       if: ${{ matrix.platform != 'arm64' }}
-      # run: cmd /c "$env:VSDevTestCmd" /Platform:${{ matrix.platform }} test\bin\${{ matrix.platform }}\${{ matrix.configuration }}\net6.0-windows10.0.22000.0\DevHome.Test.dll
-      run: cmd /c "$env:VSDevTestCmd" /Platform:${{ matrix.platform }} /Logger:"trx;LogFileName=DevHome.Test-${{ matrix.platform }}-${{ matrix.configuration }}.trx" test\\bin\\${{ matrix.platform }}\\${{ matrix.configuration }}\\net6.0-windows10.0.22000.0\\DevHome.Test.dll
+      run: cmd /c "$env:VSDevTestCmd" /Platform:${{ matrix.platform }} test\\bin\\${{ matrix.platform }}\\${{ matrix.configuration }}\\net6.0-windows10.0.22000.0\\DevHome.Test.dll
 
-    # - name: Run Unittests
-    #   shell: pwsh
-    #   run: .\Test.ps1 -Platform ${{ matrix.platform }} -Configuration ${{ matrix.configuration }}
-
-    - name: Upload dotnet test results
-      uses: actions/upload-artifact@v3
-      with:
-        name: dotnet-testresults-${{ matrix.configuration }}
-        path: *.trx
-      if: ${{ always() }}
+    - name: Tools Unittests
+      if: ${{ matrix.platform != 'arm64' }}
+      run: |
+        foreach ($toolPath in (Get-ChildItem "tools")) {
+          $tool = $toolPath.Name
+          cmd /c "$env:VSDevTestCmd" /Platform:${{ matrix.platform }} tools\\$tool\\*UnitTest\\bin\\${{ matrix.platform }}\\${{ matrix.configuration }}\\net6.0-windows10.0.22000.0\\*.UnitTest.dll
+        )
