@@ -91,4 +91,4 @@ jobs:
         foreach ($toolPath in (Get-ChildItem "tools")) {
           $tool = $toolPath.Name
           cmd /c "$env:VSDevTestCmd" /Platform:${{ matrix.platform }} tools\\$tool\\*UnitTest\\bin\\${{ matrix.platform }}\\${{ matrix.configuration }}\\net6.0-windows10.0.22000.0\\*.UnitTest.dll
-        )
+        }
