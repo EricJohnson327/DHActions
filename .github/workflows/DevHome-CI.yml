@@ -81,11 +81,11 @@ jobs:
         echo "Using VSDevTestCmd: ${VSDevTestCmd}"
         Add-Content $env:GITHUB_ENV "VSDevTestCmd=$VSDevTestCmd"
 
-    - name: DevHome Unittests
+    - name: DevHome UnitTests
       if: ${{ matrix.platform != 'arm64' }}
       run: cmd /c "$env:VSDevTestCmd" /Platform:${{ matrix.platform }} test\\bin\\${{ matrix.platform }}\\${{ matrix.configuration }}\\net6.0-windows10.0.22000.0\\DevHome.Test.dll
 
-    - name: Tools Unittests
+    - name: Tools UnitTests
       if: ${{ matrix.platform != 'arm64' }}
       run: |
         foreach ($UnitTestPath in (Get-ChildItem "tools\\*\\*UnitTest\\bin\\${{ matrix.platform }}\\${{ matrix.configuration }}\\net6.0-windows10.0.22000.0\\*.UnitTest.dll")) {
